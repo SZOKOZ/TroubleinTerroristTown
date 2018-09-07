@@ -20,6 +20,7 @@
 #include "core/config.sp"
 #include "core/natives.sp"
 #include "core/sql.sp"
+#include "SZ_EXE Stocks.inc" //Will move the stocks into ttt file as more specialised functions in a bit.
 
 public Plugin myinfo =
 {
@@ -2908,6 +2909,59 @@ public Action Event_PlayerDeath(Event event, const char[] name, bool dontBroadca
 		}
 	}
 
+
+    if (g_iRole[iAttacker] == TTT_TEAM_TRAITOR && (g_iRole[client] == TTT_TEAM_INNOCENT || g_iRole[client] == TTT_TEAM_DETECTIVE))
+    {
+    	{
+    		int traitorWitnesses[MAXPLAYERS];
+    		int victimWitnesses[MAXPLAYERS];
+    		int sceneWitnesses[MAXPLAYERS];
+    		
+    		int tWitnesses = GetClientsVisible(iAttacker, traitorWitnesses, sizeof(traitorWitnesses));
+    		int vWitnesses = GetClientsVisible(client, victimWitnessess, sizeof(victimWitnesses));
+    		int sceneWitnessCount = 0;
+    		
+    		//Check if witnesses witnessed both traitor and victim.
+    		for (int i = 0; i < tWitnesses; i++)
+    		{
+    			for (int j = 0; j < vWitnesses; j++)
+    			{
+    				if (tWitnesses[i] != vWitnesses[j])
+    				{
+    					continue;
+    				}
+    				
+    				sceneWitness[sceneWitness] = i;
+    				sceneWitnessCount++;
+    				break;
+    			}
+    		}
+    		
+    		if (witnessCount > 0)
+    		{
+    			char witnessList[2048];
+    			
+    			for (int witness = 0; witness < sceneWitnessCount; witness++)
+    			{
+    				char witnessName[MAX_NAME_LENGTH];
+    				GetClientName(sceneWitnesses[witness], witnessName, sizeof(witnessName));
+    				StrCat(witnessList, sizeof(witnessList), witnessName);
+    				
+    				if (witness < sceneWitnessCount)
+    				{
+    					StrCat(witnessList, sizeof(witnessList), ", ");
+    				}
+    			}
+    			
+    			char witnessLog[TTT_LOG_SIZE];
+    			Format(witnessLog, sizeof(witnessLog), "%N's death was witnessed by: %s.", client, witnessList);
+    			
+    			addArrayTime(witnessLog);
+    		}
+    		
+    	}
+    }
+    
 	if (g_iRole[client] == TTT_TEAM_UNASSIGNED)
 	{
 		CS_SetClientClanTag(client, "UNASSIGNED");
